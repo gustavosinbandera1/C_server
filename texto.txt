@@ -1,0 +1,11 @@
+we have comlinkA,holocronA,userInterfaceA and comlinkB,holocronB,userInterfaceB
+
+the controller is connected to comlink through websocket API, 
+at this moment the controller is a web socket client,and need to log dfata every configured time to comlinkA server
+comlinkA need to get this information from controller and process many things and send alarm notifications to holocrom 
+if is there any, 
+
+for instance the path could be controller (websocket client) sending data to comlinkA every 5 minutes
+comlinkA need to get the data and process some alarms and some realtime data information, and send notification to holocronA throught web API
+the comunication in this case b/w holocromA and UIA is by realtime web events streaming, all is automatically
+the controller is sending data without any request

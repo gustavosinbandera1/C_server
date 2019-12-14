@@ -1,0 +1,22 @@
+{
+  "name": "handlecontrollermessages",
+  "version": "1.0.0",
+  "description": "test C code",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gustavosinbandera1@bitbucket.org/AMS_Linux_dev/handlecontrollermessages.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/AMS_Linux_dev/handlecontrollermessages#readme",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "child-process-promise": "^2.2.1",
+    "child_process": "^1.0.2",
+    "readline": "^1.3.0"
+  }
+}

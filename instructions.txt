@@ -1,0 +1,56 @@
+
+
+cd libwebsockets
+sudo apt-get install libssl-dev
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+ldconfig
+
+This will install the library in /usr/local/include.
+And to make sure of the version you just installed:
+///////////////////////////////////////////////////////
+
+
+to create any plugin we need to rewrite plugin-standalone that is an example, 
+we can inside plugin-standalone folder create a build directory and inside this latest one 
+
+cmake ..
+make
+sudo make install 
+"Installing: /usr/local/share/libwebsockets-test-server/plugins/libprotocol_example_standalone.so"
+
+
+gcc -o test-server test-server.c -lpthread -lwebsockets
+
+
+install openssl
+
+cmake .. -DCMAKE_BUILD_TYPE=DEBUG
+
+
+
+
+
+
+
+///server asa service
+
+
+//save as a comlink.service inside /etc/systemd/system/
+[Unit]
+Description=Node.js Hello World Http Server
+
+[Service]
+PIDFile=/tmp/hello_world-99.pid
+User=<Your Username>
+Group=<Your User Group>
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/home/<username>/hello_world/
+ExecStart=/home/<username>/hello_world/server.js
+
+
+StandardOutput=syslog
