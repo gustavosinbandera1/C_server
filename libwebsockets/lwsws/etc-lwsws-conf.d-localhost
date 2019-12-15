@@ -1,3 +1,4 @@
+
 {
  "vhosts": [ {
      "name": "localhost",
@@ -8,7 +9,7 @@
 #     "host-ssl-cert": "/etc/pki/tls/certs/libwebsockets.org.crt",
 #     "host-ssl-ca":   "/etc/pki/tls/certs/libwebsockets.org.cer",
      "access-log": "/var/log/lwsws/test-access-log",
-#     "sts": "on",
+     "sts": "on",
      "mounts": [{
        "mountpoint": "/",
        "origin": "file://_lws_ddir_/libwebsockets-test-server",
@@ -21,18 +22,26 @@
         "mountpoint": "/server-status",
         "origin": "file://_lws_ddir_/libwebsockets-test-server/server-status",
         "default": "server-status.html"
-	}, {
-	"mountpoint": "/testcgi",
-	"origin": "cgi://_lws_ddir_/libwebsockets-test-server/lws-cgi-test.sh"
+        }, {
+        "mountpoint": "/testcgi",
+        #"origin": "cgi://_lws_ddir_/libwebsockets-test-server/lws-cgi-test.sh"
+         "origin": "cgi://_lws_ddir_/libwebsockets-test-server/lws-cgi-test.sh"
 
        }, {
         "mountpoint": "/formtest",
-        "origin": "callback://protocol-post-demo" 
-       }],
+        "origin": "callback://protocol-post-demo"
+       },
+       {
+           "mountpoint": "/formtest2",
+           "origin": "callback://protocol-lws-packet"
+        }
+        ],
      # which protocols are enabled for this vhost, and optional
      # vhost-specific config options for the protocol
      #
-     "ws-protocols": [{
+
+
+        "ws-protocols": [{
        "lws-meta": {
          "status": "ok"
        },
@@ -45,13 +54,23 @@
        "lws-status": {
          "status": "ok"
        },
+
        "protocol-post-demo": {
          "status": "ok"
        },
+        "protocol-lws-packet":{
+          "status":"ok"
+        },
        "lws-server-status": {
          "status": "ok",
-	 "update-ms": "5000"
-       }
+         "update-ms": "5000"
+       },
+         "example-standalone-protocol": {
+          "status": "ok"
+        },
+        "lws-minimal":{
+           "status": "ok"
+        }
      }]
     }
   ]

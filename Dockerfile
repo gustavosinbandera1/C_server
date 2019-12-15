@@ -6,7 +6,7 @@ EXPOSE 7681
 
 
 ENV redisPort 6379
-ENV redisHost redis
+ENV redisHost "localhost"
 # ENV comlinkPort 2579
 # ENV comlinkHost localhost
 
@@ -73,17 +73,23 @@ WORKDIR /usr/local/bin
 COPY redisClient.c /usr/local/bin
 RUN gcc -o redisClient redisClient.c -lhiredis
 
-#compiling C httpClient.c
+
+#compiling C httpClient.c   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 WORKDIR /usr/local/bin
 COPY httpClient.c /usr/local/bin
 RUN gcc -o httpClient httpClient.c
 
 
-# WORKDIR /usr/local/src
-# COPY redisClient.c /usr/local/src
-# RUN gcc -o redisClient redisClient.c -lhiredis
 
-#compiling plugins
+
+# Installing redis server, !!!!just for testing, this need to be removed  or commented
+RUN apt-get install redis-server
+RUN systemctl enable redis-server.service
+RUN redis-server --daemonize yes
+
+
+#########################compiling plugins##################################################
+############################################################################################
 
 #compiling plugin-standalone
 WORKDIR /usr/local/src/libwebsockets/plugin-standalone
@@ -117,6 +123,12 @@ RUN make install
 ###############################################################
 
 
+
+
+
+
+###################NODEJS JUST FOR TEST AND PLAY WITH JAVASCRIPT CLIENT, BUT REALLY DOESNT NEEDED
+#########################WE CAN PLAY WITH C CLIENT AS WELL
 
 #Install nodejs environment
 #####################################################################################
@@ -164,9 +176,6 @@ COPY /nodejsWebSocketClient/package*.json /usr/local/src/nodejsWebSocketClient
 RUN npm install
 
 
-# WORKDIR /usr/local/src
-# COPY redisClient.c /usr/local/src
-# RUN gcc -o redisClient redisClient.c -lhiredis
 
 
 # RUN systemctl enable /usr/local/lib/systemd/lwsws.service
@@ -178,11 +187,12 @@ CMD /usr/local/bin/shell.sh ; sleep infinity
 WORKDIR /usr/local/src
 
 
+
+
+######################HOW TO BUILD############################################
 #build
 #sudo docker build -t lwsws-container .
 
 #run
 # sudo docker run -p 7681:7681 -it lwsws-container
 
-
-#sudo systemctl stop redis-server.service

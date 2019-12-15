@@ -197,10 +197,6 @@ callback_post_demo(struct lws *wsi, enum lws_callback_reasons reason,
 
 
 
-
-
-
-
 #define LWS_PLUGIN_PROTOCOL_POST_DEMO \
 	{ \
 		"protocol-post-demo", \

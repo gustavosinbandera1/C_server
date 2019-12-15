@@ -41,7 +41,7 @@ struct msg {
 /* one of these is created for each client connecting to us */
 
 struct per_session_data__lws_minimal {
-	struct per_session_data__lws_minimal *pss_list;
+	struct per_session_data__lws_minimal *pss_list; //list of sockets connected
 	struct lws *wsi;
 	int last; /* the last message number we sent */
 };
@@ -151,7 +151,7 @@ char* getRedisCommand(const char* host, const char* port, const char* key, const
 }
 
 char* getHttpCommand(const char* host, const char* port, const char* packet) {
-return "curl -d \"testcompiling-aa\" -H \"Content-Type: application/x-www-form-urlencoded\" -X POST http://localhost:7681/formtest2";
+return "curl -d \"testcompiling-aa\" -H \"Content-Type: application/x-www-form-urlencoded\" -X POST http://localhost:7681/formtest";
 }
 
 void redisNetClose(redisContext *c) {
@@ -265,9 +265,9 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 				free(tokens);
 			}
 			//send notification to comlink server(nodejs code)
-			command = getHttpCommand(host, port, bufferData);
+			/* command = getHttpCommand(host, port, bufferData);
 			fprintf(stderr,"The command to send data to comlink is: %s\n", command);
-			fprintf(stderr, system(command));
+			fprintf(stderr, system(command)); */
 
 			//free(command);
 			
