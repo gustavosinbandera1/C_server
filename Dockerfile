@@ -28,7 +28,7 @@ WORKDIR /usr/local/src/
 COPY libwebsockets /usr/local/src/libwebsockets 
 
 WORKDIR /usr/local/src/libwebsockets
-#RUN rm -r build
+RUN rm -r build
 RUN mkdir build
 WORKDIR /usr/local/src/libwebsockets/build
 
@@ -45,10 +45,10 @@ RUN mkdir /usr/local/lib/systemd
 
 
 # Copy the some configs
-ADD ./lwsws_conf /etc/lwsws/conf
-ADD ./lwsws_my_vhost /etc/lwsws/conf.d/test-server
-ADD ./lwsws_systemd.service /usr/local/lib/systemd/lwsws.service
-ADD ./lwsws_logrotate /etc/logrotate.d/lwsws
+ADD ./lwsws_comlink_v2_conf /etc/lwsws/conf
+ADD ./lwsws_comlink_v2_host /etc/lwsws/conf.d/comlink_v2_server
+ADD ./lwsws_comlink_v2_systemd.service /usr/local/lib/systemd/lwsws.service
+ADD ./lwsws_comlink_v2_logrotate /etc/logrotate.d/lwsws
 ADD ./check.html /usr/local/share/libwebsockets-test-server/check.html
 
 RUN apt-get install redis-tools -y
@@ -103,7 +103,7 @@ RUN make install
 #compiling plugin lws_packet
 ##############################################################
 WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_packet
-#RUN rm -r build
+RUN rm -r build
 RUN mkdir build
 WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_packet/build
 RUN cmake ..
@@ -111,12 +111,24 @@ RUN make
 RUN make install
 ###############################################################
 
-#compiling plugin lws_minimal
+#compiling plugin lws_socket
 ##############################################################
-WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_minimal
-#RUN rm -r build
+WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_websocket
+RUN rm -r build
 RUN mkdir build
-WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_minimal/build
+WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_websocket/build
+RUN cmake ..
+RUN make
+RUN make install
+###############################################################
+
+
+#compiling plugin lws_http
+##############################################################
+WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_http
+RUN rm -r build
+RUN mkdir build
+WORKDIR /usr/local/src/libwebsockets/plugins/plugin_lws_http/build
 RUN cmake ..
 RUN make
 RUN make install

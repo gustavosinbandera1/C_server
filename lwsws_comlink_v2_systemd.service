@@ -1,5 +1,5 @@
 [Unit]
-Description=Libwebsockets Web Server
+Description=Comlink_v2 Server
 After=syslog.target
 
 [Service]

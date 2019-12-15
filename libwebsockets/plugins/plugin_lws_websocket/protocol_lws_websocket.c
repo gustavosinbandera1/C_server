@@ -1,15 +1,3 @@
-/*
- * ws protocol handler plugin for "lws-minimal"
- *
- * Copyright (C) 2010-2018 Andy Green <andy@warmcat.com>
- *
- * This file is made available under the Creative Commons CC0 1.0
- * Universal Public Domain Dedication.
- *
- * This version holds a single message at a time, which may be lost if a new
- * message comes.  See the minimal-ws-server-ring sample for the same thing
- * but using an lws_ring ringbuffer to hold up to 8 messages at a time.
- */
 
 #if !defined (LWS_PLUGIN_STATIC)
 #define LWS_DLL
@@ -40,19 +28,19 @@ struct msg {
 
 /* one of these is created for each client connecting to us */
 
-struct per_session_data__lws_minimal {
-	struct per_session_data__lws_minimal *pss_list; //list of sockets connected
+struct per_session_data__lws_websocket {
+	struct per_session_data__lws_websocket *pss_list; //list of sockets connected
 	struct lws *wsi;
 	int last; /* the last message number we sent */
 };
 
 /* one of these is created for each vhost our protocol is used with */
-struct per_vhost_data__lws_minimal {
+struct per_vhost_data__lws_websocket {
 	struct lws_context *context;
 	struct lws_vhost *vhost;
 	const struct lws_protocols *protocol;
 
-	struct per_session_data__lws_minimal *pss_list; /* linked-list of live pss*/
+	struct per_session_data__lws_websocket *pss_list; /* linked-list of live pss*/
 
 	struct msg amsg; /* the one pending message... */
 	int current; /* the current message number we are caching */
@@ -161,7 +149,7 @@ void redisNetClose(redisContext *c) {
 	}
 }
 /* destroys the message when everyone has had a copy of it */
-static void __lws_minimal_destroy_message(void *_msg) {
+static void __lws_websocket_destroy_message(void *_msg) {
 	struct msg *msg = _msg;
 
 	free(msg->payload);
@@ -169,11 +157,11 @@ static void __lws_minimal_destroy_message(void *_msg) {
 	msg->len = 0;
 }
 
-static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reason,
+static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons reason,
 	void *user, void *in, size_t len)
 {
-	struct per_session_data__lws_minimal *pss = (struct per_session_data__lws_minimal *)user;
-	struct per_vhost_data__lws_minimal *vhd = (struct per_vhost_data__lws_minimal *)
+	struct per_session_data__lws_websocket *pss = (struct per_session_data__lws_websocket *)user;
+	struct per_vhost_data__lws_websocket *vhd = (struct per_vhost_data__lws_websocket *)
 			lws_protocol_vh_priv_get(lws_get_vhost(wsi),
 					lws_get_protocol(wsi));
 	
@@ -190,7 +178,7 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 	case LWS_CALLBACK_PROTOCOL_INIT:
 		vhd = lws_protocol_vh_priv_zalloc(lws_get_vhost(wsi),
 				lws_get_protocol(wsi),
-				sizeof(struct per_vhost_data__lws_minimal));
+				sizeof(struct per_vhost_data__lws_websocket));
 		vhd->context = lws_get_context(wsi);
 		vhd->protocol = lws_get_protocol(wsi);
 		vhd->vhost = lws_get_vhost(wsi);
@@ -205,7 +193,7 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 
 	case LWS_CALLBACK_CLOSED:
 		/* remove our closing pss from the list of live pss */
-		lws_ll_fwd_remove(struct per_session_data__lws_minimal, pss_list,
+		lws_ll_fwd_remove(struct per_session_data__lws_websocket, pss_list,
 				  pss, vhd->pss_list);
 		break;
 
@@ -228,7 +216,7 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 
 	case LWS_CALLBACK_RECEIVE:
 		if (vhd->amsg.payload)
-			__lws_minimal_destroy_message(&vhd->amsg);
+			__lws_websocket_destroy_message(&vhd->amsg);
 
 		vhd->amsg.len = len;
 		/* notice we over-allocate by LWS_PRE */
@@ -254,7 +242,7 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 			fprintf(stderr,"the key is: %s\n",key);
 			char* command = getRedisCommand(host, port, key, bufferData);
 			fprintf(stderr, "the command to execute redis is : %s\n", command);
-			fprintf(stderr,system(command));
+			fprintf(stderr, (char*)system(command));
 			//free(command);
 
 			if (tokens) {
@@ -295,11 +283,11 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 	return 0;
 }
 
-#define LWS_PLUGIN_PROTOCOL_LWS_MINIMAL \
+#define LWS_PLUGIN_PROTOCOL_LWS_WEBSOCKET \
 	{ \
-		"lws-minimal", \
-		callback_lws_minimal, \
-		sizeof(struct per_session_data__lws_minimal), \
+		"lws-websocket", \
+		callback_lws_websocket, \
+		sizeof(struct per_session_data__lws_websocket), \
 		128, \
 		0, NULL, 0 \
 	}
@@ -309,11 +297,11 @@ static int callback_lws_minimal(struct lws *wsi, enum lws_callback_reasons reaso
 /* boilerplate needed if we are built as a dynamic plugin */
 
 static const struct lws_protocols protocols[] = {
-	LWS_PLUGIN_PROTOCOL_LWS_MINIMAL
+	LWS_PLUGIN_PROTOCOL_LWS_WEBSOCKET
 };
 
 LWS_EXTERN LWS_VISIBLE int
-init_protocol_lws_minimal(struct lws_context *context,
+init_protocol_lws_websocket(struct lws_context *context,
 		      struct lws_plugin_capability *c)
 {
 	if (c->api_magic != LWS_PLUGIN_API_MAGIC) {
@@ -331,7 +319,7 @@ init_protocol_lws_minimal(struct lws_context *context,
 }
 
 LWS_EXTERN LWS_VISIBLE int
-destroy_protocol_lws_minimal(struct lws_context *context)
+destroy_protocol_lws_websocket(struct lws_context *context)
 {
 	return 0;
 }

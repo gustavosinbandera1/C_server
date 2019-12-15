@@ -5,19 +5,21 @@
 			- [Code snippet 1](#code-snippet-1)
 			- [Code snippet 2](#code-snippet-2)
 			- [Code snippet 3.](#code-snippet-3)
+			- [lwsws_comlink_v2_conf](#lwswscomlinkv2conf)
+			- [lwsws_comlink_v2_host](#lwswscomlinkv2host)
 			- [Code snippet 4](#code-snippet-4)
 			- [Building Dockerfile](#building-dockerfile)
 		- [How to work with plugins](#how-to-work-with-plugins)
 			- [compiling plugin-standalone](#compiling-plugin-standalone)
-			- [How the plugin standalone example looks](#how-the-plugin-standalone-example-looks)
-			- [Main structure of the plugin](#main-structure-of-the-plugin)
+				- [How the plugin standalone example looks](#how-the-plugin-standalone-example-looks)
+				- [Main structure of the plugin](#main-structure-of-the-plugin)
 			- [Callback prototype](#callback-prototype)
-			- [struct lws *wsi](#struct-lws-wsi)
-			- [enum lws_callback_reasons reason](#enum-lwscallbackreasons-reason)
-			- [void* in](#void-in)
-			- [state machine](#state-machine)
-			- [section writeable Only send data when socket writeable](#section-writeable-only-send-data-when-socket-writeable)
-			- [section oneper Only one lws_write per WRITEABLE callback](#section-oneper-only-one-lwswrite-per-writeable-callback)
+				- [struct lws *wsi](#struct-lws-wsi)
+				- [enum lws_callback_reasons reason](#enum-lwscallbackreasons-reason)
+				- [void* in](#void-in)
+				- [state machine](#state-machine)
+				- [section writeable Only send data when socket writeable](#section-writeable-only-send-data-when-socket-writeable)
+				- [section oneper Only one lws_write per WRITEABLE callback](#section-oneper-only-one-lwswrite-per-writeable-callback)
 
 
 # COMLINK VERSION 2 IMPLEMENTATION IN C
@@ -92,7 +94,118 @@ ADD ./lwsws_logrotate /etc/logrotate.d/lwsws
 ADD ./check.html /usr/local/share/libwebsockets-test-server/check.html
 
 ```
-The code snippet 3 just is creating a needed folders to configure the server and copy some configuartion files, we are going to talk about it late.
+The code snippet 3 just is creating a needed folders to configure the server and copy some configuartion files.
+Inside root folder we can four files: 
+
+1. lwsws_comlink_v2_conf
+2. lwsws_comlink_v2_host
+3. lwsws_comlink_v2_logrotate
+4. lwsws_comlink_v2_systemd.service
+
+#### lwsws_comlink_v2_conf
+
+There is a single file intended for global settings
+
+```
+{
+  "global": {
+   "username": "AMS-TEAM",
+	 "groupname": "AMS-TEAM",
+   "uid": "33",
+   "gid": "33",
+   "interface": "eth0",
+   "count-threads": "1",
+   "server-string": "lwsws",
+   "ws-pingpong-secs": "200",
+   "init-ssl": "yes"
+   }
+}
+
+```
+
+#### lwsws_comlink_v2_host
+and a config directory intended to take one file per vhost, you can found more information about the topic [here](https://github.com/warmcat/libwebsockets/blob/master/READMEs/README.lwsws.md)
+**/etc/lwsws/conf.d/comlink_v2**
+
+```json
+{
+ "vhosts": [ {
+     "name": "localhost",
+     "port": "7681",
+# by default, bind to all interfaces, but you can restrict it
+#     "interface": "lo",
+#     "host-ssl-key":  "/etc/pki/tls/private/libwebsockets.org.key",
+#     "host-ssl-cert": "/etc/pki/tls/certs/libwebsockets.org.crt",
+#     "host-ssl-ca":   "/etc/pki/tls/certs/libwebsockets.org.cer",
+     "access-log": "/var/log/lwsws/test-access-log",
+     "sts": "on",
+     "mounts": [{
+       "mountpoint": "/",
+       "origin": "file://_lws_ddir_/libwebsockets-test-server",
+       "default": "test.html",
+       "cache-max-age": "60",
+       "cache-reuse": "1",
+       "cache-revalidate": "1",
+       "cache-intermediaries": "0"
+       }, {
+        "mountpoint": "/server-status",
+        "origin": "file://_lws_ddir_/libwebsockets-test-server/server-status",
+        "default": "server-status.html"
+        }, {
+        "mountpoint": "/testcgi",
+        #"origin": "cgi://_lws_ddir_/libwebsockets-test-server/lws-cgi-test.sh"
+         "origin": "cgi://_lws_ddir_/libwebsockets-test-server/lws-cgi-test.sh"
+
+       }, {
+        "mountpoint": "/formtest",
+        "origin": "callback://protocol-post-demo"
+       },
+       {
+           "mountpoint": "/formtest2",
+           "origin": "callback://protocol-lws-packet"
+        }
+		],
+		
+
+     # which protocols are enabled for this vhost, and optional
+     # vhost-specific config options for the protocol
+     #
+        "ws-protocols": [{
+       "lws-meta": {
+         "status": "ok"
+       },
+       "dumb-increment-protocol": {
+         "status": "ok"
+       },
+       "lws-mirror-protocol": {
+         "status": "ok"
+       },
+       "lws-status": {
+         "status": "ok"
+       },
+
+       "protocol-post-demo": {
+         "status": "ok"
+       },
+        "protocol-lws-packet":{
+          "status":"ok"
+        },
+       "lws-server-status": {
+         "status": "ok",
+         "update-ms": "5000"
+       },
+         "example-standalone-protocol": {
+          "status": "ok"
+        },
+        "lws-websocket":{
+           "status": "ok"
+        }
+     }]
+    }
+  ]
+}
+
+```
 
 
 #### Code snippet 4
@@ -156,7 +269,7 @@ How to build the pluging using Dockerfile is described [here](#code-snippet-4)
 
 
 
-#### How the plugin standalone example looks
+##### How the plugin standalone example looks
 
 This is the very basic plugin to ilustrate how to create customs plugins. 
 
@@ -294,7 +407,7 @@ destroy_protocol_example_standalone(struct lws_context *context)
 
 In the first look could be hard try to understand the code, but dont worry, really its not hard, just trainning its enough to be more confident.
 
-#### Main structure of the plugin
+##### Main structure of the plugin
 
 We can see there is a function called **callback_dumb_increment**, this is the most important function, in all pluging are you going to create.
 
@@ -315,7 +428,7 @@ callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			void *user, void *in, size_t len) { }
 ```
 
-#### struct lws *wsi
+##### struct lws *wsi
 
 We can use this object to get information about the client **context, protocol, vhost**, for instance when prtocol Init.
 
@@ -335,12 +448,12 @@ case LWS_CALLBACK_PROTOCOL_INIT:
 
 ```
 
-####  enum lws_callback_reasons reason
+#####  enum lws_callback_reasons reason
 With this oaram we can handle the state machine to do whatever we want.
 For more information about ```reason``` definition, you can clieck [here](https://libwebsockets.org/lws-api-doc-master/html/group__usercb.html).
 You can see how to use callbacks and state machine in this very basic useful [example](https://github.com/warmcat/libwebsockets/blob/master/plugins/protocol_client_loopback_test.c)
 
-#### void* in
+##### void* in
 
 This void* pointer is used for some calback functions, and can gave you information, i.e from POST request we can capture the body with this pointer.
 
@@ -366,7 +479,7 @@ Parameters
 
 ```
 
-#### state machine
+##### state machine
 That is the minimalistic state machine, we could capture more different [events](https://libwebsockets.org/lws-api-doc-v2.2-stable/html/group__usercb.html), This state machine is running in a loop.
 
 ```Ruby
@@ -393,7 +506,7 @@ switch (reason) {
 
 
 
-#### section writeable Only send data when socket writeable
+##### section writeable Only send data when socket writeable
 
 You should only send data on a websocket connection from the user callback LWS_CALLBACK_SERVER_WRITEABLE (or LWS_CALLBACK_CLIENT_WRITEABLE for clients).
 
@@ -407,7 +520,7 @@ If you want to send something, do NOT just send it but request a callback when t
 Usually you will get called back immediately next time around the service loop, but if your peer is slow or temporarily inactive the callback will be delayed accordingly. Generating what to write and sending it should be done in the ...WRITEABLE callback.
 
 
-#### section oneper Only one lws_write per WRITEABLE callback
+##### section oneper Only one lws_write per WRITEABLE callback
 
 From v2.5, lws strictly enforces only one lws_write() per WRITEABLE callback.
 
@@ -523,6 +636,8 @@ case LWS_CALLBACK_HTTP_WRITEABLE:
                 goto try_to_reuse;
 		break;
 ```
+
+
 
 
 

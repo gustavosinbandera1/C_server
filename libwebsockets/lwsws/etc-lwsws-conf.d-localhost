@@ -68,7 +68,7 @@
          "example-standalone-protocol": {
           "status": "ok"
         },
-        "lws-minimal":{
+        "lws-websocket-protocol":{
            "status": "ok"
         }
      }]

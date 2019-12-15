@@ -7,9 +7,9 @@ endif()
 # This shows one way to build a standalone plugin
 # outside of lws itself
 
-project(lws_protocol_plugin_minimal C)
+project(lws_protocol_plugin_websocket C)
 
-set(PACKAGE "lws_protocol_plugin_lws_minimal")
+set(PACKAGE "lws_protocol_plugin_lws_websocket")
 set(CPACK_PACKAGE_NAME "${PACKAGE}")
 set(CPACK_PACKAGE_VERSION "0.1")
 set(CPACK_PACKAGE_VENDOR "gustavosinbandera1@hotmail.com")
@@ -17,9 +17,9 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE} ${PACKAGE_VERSION}")
 set(SOVERSION "1")
 set(VERSION "0.1")
 
-set(PLUGIN_NAME "protocol_lws_minimal")
+set(PLUGIN_NAME "protocol_lws_websocket")
 # space-separated list of sources
-set(PLUGIN_SRCS protocol_lws_minimal.c)
+set(PLUGIN_SRCS protocol_lws_websocket.c)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 

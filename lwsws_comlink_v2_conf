@@ -4,6 +4,8 @@
 
 {
   "global": {
+   "username": "AMS-TEAM",
+	 "groupname": "AMS-TEAM",
    "uid": "33",
    "gid": "33",
    "interface": "eth0",
