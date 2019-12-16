@@ -139,7 +139,7 @@ char* getRedisCommand(const char* host, const char* port, const char* key, const
 }
 
 char* getHttpCommand(const char* host, const char* port, const char* packet) {
-return "curl -d \"testcompiling-aa\" -H \"Content-Type: application/x-www-form-urlencoded\" -X POST http://localhost:7681/formtest";
+return "curl -d \"testcompiling-aa\" -H \"Content-Type: application/x-www-form-urlencoded\" -X POST http://localhost:2579/formtest2";
 }
 
 void redisNetClose(redisContext *c) {
@@ -253,9 +253,9 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 				free(tokens);
 			}
 			//send notification to comlink server(nodejs code)
-			/* command = getHttpCommand(host, port, bufferData);
+			command = getHttpCommand(host, port, bufferData);
 			fprintf(stderr,"The command to send data to comlink is: %s\n", command);
-			fprintf(stderr, system(command)); */
+			fprintf(stderr, system(command)); 
 
 			//free(command);
 			
