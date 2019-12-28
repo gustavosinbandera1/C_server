@@ -59,10 +59,6 @@ enum enum_param_names {
 };
 
 
-
-
-
-
 void CreateHeaders(struct lws *wsi,void *user,char* jsonText) {
 	struct per_session_data__lws_packet *pss = (struct per_session_data__lws_packet *)user;
 	unsigned char *buffer;
@@ -133,7 +129,7 @@ callback_lws_packet(struct lws *wsi, enum lws_callback_reasons reason,
 //to use with http request
 		case LWS_CALLBACK_HTTP_WRITEABLE:
 		fprintf(stderr,"Vamos a responder");
-		char *universal_response = "hola gustavo desde el serverlws_write";
+		char *universal_response = "hola gustavo desde el server lws_write";
 		//lws_write(wsi, universal_response,strlen(universal_response), LWS_WRITE_HTTP); 
 		//return -1;
 		 if (pss->justHeader==0) {

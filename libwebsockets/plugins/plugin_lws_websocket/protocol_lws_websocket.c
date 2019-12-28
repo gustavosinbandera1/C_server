@@ -140,7 +140,7 @@ char* getRedisCommand(const char* host, const char* port, const char* key, const
 }
 
 char* getHttpCommand(const char* host, const char* packet) {
-	char* temp1 = concat("wget --post-data ", "packet:"); 
+	char* temp1 = concat("wget --post-data ", "packet="); 
 	char* temp2 = concat(temp1, packet);  
 	char* temp3 = concat(temp2, " ");   
 	char* temp4 = concat(temp3, host); 
