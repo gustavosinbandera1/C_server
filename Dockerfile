@@ -7,13 +7,13 @@ EXPOSE 7681
 
 ENV redisPort 6379
 ENV redisHost "localhost"
-# ENV comlinkPort 2579
-# ENV comlinkHost localhost
+#ENV comlinkPort 2579
+ENV comlinkHost "http://localhost:4000/"
 
 #Installing server C websockets lwsws
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y vim gcc cmake git libssl-dev libev-dev pkg-config systemd-sysv zlib1g-dev libsqlite3-dev
+RUN apt-get install -y vim gcc cmake git libssl-dev libev-dev pkg-config systemd-sysv zlib1g-dev libsqlite3-dev wget
 
 
 RUN apt-get install git build-essential cmake libmicrohttpd-dev libcurl4-openssl-dev -y
@@ -181,9 +181,9 @@ RUN npm i npm@latest -g
 
 ##add websocketClient js for test
 WORKDIR /usr/local/src
-COPY nodejsWebSocketClient /usr/local/src/nodejsWebSocketClient
+COPY nodejsWebSocketClient /usr/local/src/nodejsWebSocketClient/
 WORKDIR /usr/local/src/nodejsWebSocketClient
-COPY /nodejsWebSocketClient/package*.json /usr/local/src/nodejsWebSocketClient
+COPY /nodejsWebSocketClient/package*.json /usr/local/src/nodejsWebSocketClient/
 #WORKDIR /usr/local/src/nodejsWebSocketClient
 RUN npm install
 
@@ -206,5 +206,5 @@ WORKDIR /usr/local/src
 #sudo docker build -t lwsws-container .
 
 #run
-# sudo docker run -p 7681:7681 -it lwsws-container
+# sudo docker run -p 7681:7681 -it comlink_v2 /bin/bash
 

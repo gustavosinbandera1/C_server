@@ -130,11 +130,6 @@ callback_post_request(struct lws *wsi, enum lws_callback_reasons reason,
           lws_callback_on_writable_all_protocol( lws_get_context( wsi ), lws_get_protocol( wsi ) );
         break;
 
-
-
-	
-
-
 //to use with http request
 		case LWS_CALLBACK_HTTP_WRITEABLE:
 		fprintf(stderr,"Vamos a responder");

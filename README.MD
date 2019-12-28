@@ -450,7 +450,7 @@ case LWS_CALLBACK_PROTOCOL_INIT:
 ```
 
 #####  enum lws_callback_reasons reason
-With this oaram we can handle the state machine to do whatever we want.
+With this param we can handle the state machine to do whatever we want.
 For more information about ```reason``` definition, you can clieck [here](https://libwebsockets.org/lws-api-doc-master/html/group__usercb.html).
 You can see how to use callbacks and state machine in this very basic useful [example](https://github.com/warmcat/libwebsockets/blob/master/plugins/protocol_client_loopback_test.c)
 

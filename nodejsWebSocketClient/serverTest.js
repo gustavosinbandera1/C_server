@@ -9,4 +9,9 @@ app.post('/formtest2', function (req, res) {
   res.end();
 });
 
-app.listen(2579);
+app.post('/', function (req, res) {
+  console.log(req.body);
+  res.end();
+});
+
+app.listen(4000);

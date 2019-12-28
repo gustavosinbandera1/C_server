@@ -148,7 +148,8 @@ int main(int argc, char **argv) {
    
     pthread_join(receive_thread, NULL);
     pthread_join(send_thread, NULL);
-    //close(sock);
+    close(*new_sock);
+    
     return 0;
 }
 

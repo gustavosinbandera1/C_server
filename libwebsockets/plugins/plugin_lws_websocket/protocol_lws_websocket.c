@@ -134,12 +134,20 @@ char* getRedisCommand(const char* host, const char* port, const char* key, const
 	char* temp5 = concat(temp4, key);
 	char* temp6 = concat(temp5, " -v "); //value 
 	char* temp7 = concat(temp6, packet);
-	fprintf(stderr, "the redis URL connection is: %s\n", temp7);
-	return temp7;
+	char* temp8 = concat(temp7, " & ");
+	fprintf(stderr, "the redis URL connection is: %s\n", temp8);
+	return temp8;
 }
 
-char* getHttpCommand(const char* host, const char* port, const char* packet) {
-return "curl -d \"testcompiling-aa\" -H \"Content-Type: application/x-www-form-urlencoded\" -X POST http://localhost:2579/formtest2";
+char* getHttpCommand(const char* host, const char* packet) {
+	char* temp1 = concat("wget --post-data ", "packet:"); 
+	char* temp2 = concat(temp1, packet);  
+	char* temp3 = concat(temp2, " ");   
+	char* temp4 = concat(temp3, host); 
+	char* temp5 = concat(temp4, " ");
+	char* temp6 = concat(temp5, " --connect-timeout=5 --tries=2 -O /dev/null &"); //the & is intended to fork the command
+	fprintf(stderr, "the POST COMMAND connection is: %s\n", temp6);
+    return temp6;
 }
 
 void redisNetClose(redisContext *c) {
@@ -169,10 +177,9 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 	char* bufferData;
 	char* key;//key to use with redis
 	char** tokens;//to store split array message
-	const char* host = getenv("redisHost");
-    const char* port = getenv("redisPort");
+	const char* redisHost = getenv("redisHost");
+    const char* redisPort = getenv("redisPort");
 	const char* comlinkHost = getenv("comlinkHost");
-	const char* comlinkPort = getenv("comlinkPort");
 
 	switch (reason) {
 	case LWS_CALLBACK_PROTOCOL_INIT:
@@ -225,36 +232,32 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 			lwsl_user("OOM: dropping\n");
 			break;
 		}
-		fprintf(stderr,"llego data\n");
 		bufferData = malloc(len+1);
 		memcpy((char *)bufferData,in,len);//message from controller (in)
 		bufferData[len]= '\0'; //string terminator
-		
 		
 		if(uVerifyCheckSum(in)) {
 			//fprintf(stderr,"rigth packetes: ");
 			//get key to store data inside redis with controller code
 			tokens = str_split((char*)in, ',');
 			key = *(tokens+1); //device code
-			//strcat(key,"_PACKET");
 			key = concat(key, "_PACKET");
 			
 			fprintf(stderr,"the key is: %s\n",key);
-			char* command = getRedisCommand(host, port, key, bufferData);
+			char* command = getRedisCommand(redisHost, redisPort, key, bufferData);
 			fprintf(stderr, "the command to execute redis is : %s\n", command);
 			fprintf(stderr, (char*)system(command));
-			//free(command);
-
+			 //free memory
 			if (tokens) {
 				for (int i = 0; *(tokens + i); i++) {
-					fprintf(stderr,"%s, ", *(tokens + i));
+					//fprintf(stderr,">>%s, ", *(tokens + i));
 					free(*(tokens + i));
 				}
 				free(tokens);
 			}
 			//send notification to comlink server(nodejs code)
-			command = getHttpCommand(host, port, bufferData);
-			fprintf(stderr,"The command to send data to comlink is: %s\n", command);
+			command = getHttpCommand(comlinkHost, bufferData);
+			fprintf(stderr,"\nThe command to send data to comlink is: %s\n", command);
 			fprintf(stderr, system(command)); 
 
 			//free(command);

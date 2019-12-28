@@ -30,7 +30,7 @@ client.on('connect', function(connection) {
         console.log("Connection Error: " + error.toString());
     });
     connection.on('close', function() {
-        console.log('echo-protocol Connection Closed');
+        console.log('websocket Connection Closed');
     });
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
@@ -39,20 +39,19 @@ client.on('connect', function(connection) {
         }
     });
     
-    function sendNumber() {
+    function sendPacket() {
         if (connection.connected) {
-            var number = Math.round(Math.random() * 0xFFFFFF);
             connection.sendUTF(data.toString());
-            setTimeout(sendNumber, 2000);
+            setTimeout(sendPacket, 2000);
         }
     }
-    sendNumber();
+    sendPacket();
 });
  
 //client.connect('ws://localhost:2579/', 'lws-server-status');
 //client.connect('ws://localhost:2579/', 'dumb-increment-protocol');
 //client.connect('ws://localhost:2579/', 'lws-status');
 //client.connect('ws://localhost:2579/', 'lws-mirror-protocol');
-client.connect('ws://localhost:7681/', 'lws-minimal');
+//client.connect('ws://localhost:7681/', 'lws-minimal');
 //client.connect('ws://localhost:7681/', 'example-standalone-protocol');
-//client.connect('ws://localhost:2579/');
+client.connect('ws://localhost:7681/', 'lws-websocket');
