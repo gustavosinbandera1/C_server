@@ -10,8 +10,9 @@ app.post('/formtest2', function (req, res) {
 });
 
 app.post('/', function (req, res) {
+  console.log("Packet from C server and controller\n");
   console.log(req.body);
-  res.end();
+  res.end('bye from httpServer');
 });
 
 app.listen(4000);

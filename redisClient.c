@@ -77,12 +77,13 @@ int main(int argc, char **argv) {
     reply = redisCommand(c,"PING");
     printf("[C-redis-app]PING: %s\n", reply->str);
     freeReplyObject(reply);
+
+    
     reply = redisCommand(c,"SET %s %s", key, packet);
     printf("[C-redis-app]SET: %s\n", reply->str);
     freeReplyObject(reply);
     
 
-    /* Try a GET and two INCR */
     reply = redisCommand(c,"GET %s",key);
     printf("GET Key : %s<--->%s\n",key, reply->str);
     freeReplyObject(reply);

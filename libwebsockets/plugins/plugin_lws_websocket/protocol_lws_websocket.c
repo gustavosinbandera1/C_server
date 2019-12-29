@@ -177,9 +177,9 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 	char* bufferData;
 	char* key;//key to use with redis
 	char** tokens;//to store split array message
-	const char* redisHost = getenv("redisHost");
-    const char* redisPort = getenv("redisPort");
-	const char* comlinkHost = getenv("comlinkHost");
+	const char* redisHost = getenv("REDIS_HOST");
+    const char* redisPort = getenv("REDIS_PORT");
+	const char* comlinkHost = getenv("COMLINK_HOST");
 
 	switch (reason) {
 	case LWS_CALLBACK_PROTOCOL_INIT:

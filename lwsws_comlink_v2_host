@@ -32,7 +32,7 @@
         "origin": "callback://protocol-post-demo"
        },
        {
-           "mountpoint": "/send-packet-to-device",
+           "mountpoint": "/c-api/packet",
            "origin": "callback://protocol-lws-packet"
         }
         ],

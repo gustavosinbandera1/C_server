@@ -134,7 +134,7 @@ callback_lws_packet(struct lws *wsi, enum lws_callback_reasons reason,
 		//return -1;
 		 if (pss->justHeader==0) {
                   //we first send the headers...
-                  CreateHeaders(wsi,user,"{ \"id\":1 }"); //hard code a responce JSON object
+                  CreateHeaders(wsi,user,"{ \"id\":10 }"); //hard code a responce JSON object
                   pss->justHeader=1;
                   //we need a callback so we can send the body.
                   lws_callback_on_writable(wsi);
