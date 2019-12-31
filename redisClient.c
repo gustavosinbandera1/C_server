@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     char* key;
     double port;
 
-    while((option = getopt(argc, argv, "h:p:-k:-v:")) !=-1) {
+    while((option = getopt(argc, argv, "h:p:k:v:")) !=-1) {
         switch (option) {
             case 'h' :
                 host = (char*)optarg;

@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <hiredis/hiredis.h>
 #include <assert.h>
+#include "functions.h"
 
 char *host = "redis";
 double port = 6378;
@@ -46,110 +47,6 @@ struct per_vhost_data__lws_websocket {
 	int current; /* the current message number we are caching */
 };
 
-char uCalTCPCheckSum(char *tuBuf, int tuIndex) {
-    char tuCnt,tuCheckSum = 0;
-    for(tuCnt = 0; tuCnt < tuIndex; tuCnt++) {
-        tuCheckSum = tuCheckSum + tuBuf[tuCnt];
-    }
-    return(tuCheckSum);
-}
-
-int uVerifyCheckSum(char *tuBuf) {
-    char tuCheckSumIndex = 0, tuCalCheckSum , tuIndex, tuRcvdCheckSum;
-    for(tuIndex = 0; tuBuf[tuIndex]; tuIndex++) {
-        if(tuBuf[tuIndex] == ',') {
-			tuCheckSumIndex = tuIndex + 1;
-		}
-	}
-
-    tuCalCheckSum = uCalTCPCheckSum(tuBuf,tuCheckSumIndex);
-	//fprintf(stderr,"\ninside function Calculated Chksm = %d\n",tuCalCheckSum);
-
-    tuRcvdCheckSum = (char)atoi(&tuBuf[tuCheckSumIndex]);
-	//fprintf(stderr,"\ninside function Rcvd Chksm = %d\n",tuRcvdCheckSum);
-
-    if(tuRcvdCheckSum == tuCalCheckSum) {
-        return 1;
-    } else {
-		return 0;
-	}
-
-}
-
-char** str_split(char* a_str, const char a_delim) {
-    char** result    = 0;
-    size_t count     = 0;
-    char* tmp        = a_str;
-    char* last_comma = 0;
-    char delim[2];
-    delim[0] = a_delim;
-    delim[1] = 0;
-
-    /* Count how many elements will be extracted. */
-    while (*tmp) {
-        if (a_delim == *tmp) {
-            count++;
-            last_comma = tmp;
-        }
-        tmp++;
-    }
-
-    /* Add space for trailing token. */
-    count += last_comma < (a_str + strlen(a_str) - 1);
-
-    /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
-    count++;
-
-    result = malloc(sizeof(char*) * count);
-
-    if (result) {
-        size_t idx  = 0;
-        char* token = strtok(a_str, delim);
-        while (token) {
-            assert(idx < count);
-            *(result + idx++) = strdup(token);
-            token = strtok(0, delim);
-        }
-        assert(idx == count - 1);
-        *(result + idx) = 0;
-    }
-    return result;
-}
-
-
-char* concat(const char *s1, const char *s2) {
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    //you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
-char* getRedisCommand(const char* host, const char* port, const char* key, const char* packet) {
-	char* temp1 = concat("/usr/local/bin/redisClient -h ",host); //host
-	char* temp2 = concat(temp1," -p ");  //port
-	char* temp3 = concat(temp2, port);   
-	char* temp4 = concat(temp3," -k ");  //key
-	char* temp5 = concat(temp4, key);
-	char* temp6 = concat(temp5, " -v "); //value 
-	char* temp7 = concat(temp6, packet);
-	char* temp8 = concat(temp7, " & ");
-	fprintf(stderr, "the redis URL connection is: %s\n", temp8);
-	return temp8;
-}
-
-char* getHttpCommand(const char* host, const char* packet) {
-	char* temp1 = concat("wget --post-data ", "packet="); 
-	char* temp2 = concat(temp1, packet);  
-	char* temp3 = concat(temp2, " ");   
-	char* temp4 = concat(temp3, host); 
-	char* temp5 = concat(temp4, " ");
-	char* temp6 = concat(temp5, " --connect-timeout=5 --tries=2 -O /dev/null &"); //the & is intended to fork the command
-	fprintf(stderr, "the POST COMMAND connection is: %s\n", temp6);
-    return temp6;
-}
-
 void redisNetClose(redisContext *c) {
 	if (c && c->fd != REDIS_INVALID_FD) {
 		close(c->fd);
@@ -177,9 +74,18 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 	char* bufferData;
 	char* key;//key to use with redis
 	char** tokens;//to store split array message
-	const char* redisHost = getenv("REDIS_HOST");
+	int packetNumber;
+
+	/*  const char* redisHost = getenv("REDIS_HOST");
     const char* redisPort = getenv("REDIS_PORT");
-	const char* comlinkHost = getenv("COMLINK_HOST");
+	const char* comlinkHost = getenv("COMLINK_HOST"); 
+
+ */
+	const char* redisHost = "localhost";
+    const char* redisPort = "6379";
+	const char* comlinkHost = "http://localhost:2579/api/device/report-data";
+
+
 
 	switch (reason) {
 	case LWS_CALLBACK_PROTOCOL_INIT:
@@ -236,10 +142,18 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 		memcpy((char *)bufferData,in,len);//message from controller (in)
 		bufferData[len]= '\0'; //string terminator
 		
-		if(uVerifyCheckSum(in)) {
-			//fprintf(stderr,"rigth packetes: ");
+		tokens = str_split((char*)in, ',');
+	    packetNumber = atoi(*tokens);
+		fprintf(stderr,"el paquete numero>>>>>>>>>>>>>>>>>%d", packetNumber);
+	
+		if(isCRCValid(packetNumber,bufferData) == true) {
+			fprintf(stderr,"rigth packetes: ");
+			//load ack on socket struct to send back to client
+			char* ack = getACK(packetNumber);
+			memcpy((char *)vhd->amsg.payload + LWS_PRE, ack, strlen(ack));
+			vhd->amsg.len = strlen(ack);
 			//get key to store data inside redis with controller code
-			tokens = str_split((char*)in, ',');
+			
 			key = *(tokens+1); //device code
 			key = concat(key, "_PACKET");
 			
@@ -247,7 +161,7 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 			char* command = getRedisCommand(redisHost, redisPort, key, bufferData);
 			fprintf(stderr, "the command to execute redis is : %s\n", command);
 			fprintf(stderr, (char*)system(command));
-			 //free memory
+
 			if (tokens) {
 				for (int i = 0; *(tokens + i); i++) {
 					//fprintf(stderr,">>%s, ", *(tokens + i));
@@ -258,19 +172,22 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 			//send notification to comlink server(nodejs code)
 			command = getHttpCommand(comlinkHost, bufferData);
 			fprintf(stderr,"\nThe command to send data to comlink is: %s\n", command);
-			fprintf(stderr, system(command)); 
-
-			//free(command);
+			fprintf(stderr, (char*)system(command)); 
 			
+			if(command) free(command);
+			if(ack) free(ack);
+
 		} else {
 			fprintf(stderr,"bad packet");
-			//send NACK
+			//load nack on socket struct to send back to client
+			char* nack = getNck(packetNumber);
+			memcpy((char *)vhd->amsg.payload + LWS_PRE, nack, strlen(nack));
+			vhd->amsg.len = strlen(nack);
+			if(nack) free(nack);
 		}
-		
-		memcpy((char *)vhd->amsg.payload + LWS_PRE, bufferData, len);
+	
 		vhd->current++;
 		free(bufferData);
-	
 		
 		/*
 		 * let everybody know we want to write something on them

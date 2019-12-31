@@ -154,8 +154,7 @@ callback_lws_packet(struct lws *wsi, enum lws_callback_reasons reason,
 			char *requested_uri = (char *) in;
 			printf("requested URI: %s\n", requested_uri);
 			char *universal_response1 = "Hello, World!";
-			if (strcmp(requested_uri, "/") == 0) {
-				
+			if (strcmp(requested_uri, "/") == 0) {	
 			}
 		break;
 

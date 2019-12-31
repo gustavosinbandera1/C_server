@@ -5,9 +5,11 @@ FROM ubuntu:18.04
 EXPOSE 7681
 
 
-ENV REDIS_HOST "prod-ams-redis.l11enm.clustercfg.cac1.cache.amazonaws.com"
-ENV REDIS_PORT 7210
-ENV COMLINK_HOST "http://localhost:2579/api/device/report-data"
+# ENV REDIS_HOST "prod-ams-redis.l11enm.clustercfg.cac1.cache.amazonaws.com"
+# ENV REDIS_PORT 7210
+ENV REDIS_HOST "localhost"
+ENV REDIS_PORT "6379"
+ENV COMLINK_HOST "http://192.168.1.54:2579/api/device/report-data"
 
 #Installing server C websockets lwsws
 RUN apt-get update
@@ -81,10 +83,10 @@ RUN gcc -o httpClient httpClient.c
 
 
 
-# Installing redis server, !!!!just for testing, this need to be removed  or commented
-# RUN apt-get install redis-server
-# RUN systemctl enable redis-server.service
-# RUN redis-server --daemonize yes
+#Installing redis server, !!!!just for testing, this need to be removed  or commented
+RUN apt-get install redis-server
+RUN systemctl enable redis-server.service
+RUN redis-server --daemonize yes
 
 
 #########################compiling plugins##################################################
@@ -139,44 +141,44 @@ RUN make install
 
 #Install nodejs environment
 #####################################################################################
-# RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-# RUN apt-get update && apt-get upgrade -y
-# RUN apt-get install -y -q --no-install-recommends \
-#         apt-transport-https \
-#         build-essential \
-#         ca-certificates \
-#         curl \
-#         git \
-#         libssl-dev \
-#         python \
-#         rsync \
-#         software-properties-common \
-#         devscripts \
-#         autoconf \
-#         ssl-cert \
-#     && apt-get clean
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y -q --no-install-recommends \
+        apt-transport-https \
+        build-essential \
+        ca-certificates \
+        curl \
+        git \
+        libssl-dev \
+        python \
+        rsync \
+        software-properties-common \
+        devscripts \
+        autoconf \
+        ssl-cert \
+    && apt-get clean
 
-# RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-# RUN apt-get install -y nodejs
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install -y nodejs
 
-# # confirm installation
-# RUN node -v
-# RUN npm -v
+# confirm installation
+RUN node -v
+RUN npm -v
 
-# # Use latest npm
-# RUN npm i npm@latest -g
+# Use latest npm
+RUN npm i npm@latest -g
 
 ############################################################################
 
 
 
-# ##add websocketClient js for test
-# WORKDIR /usr/local/src
-# COPY nodejsWebSocketClient /usr/local/src/nodejsWebSocketClient/
-# WORKDIR /usr/local/src/nodejsWebSocketClient
-# COPY /nodejsWebSocketClient/package*.json /usr/local/src/nodejsWebSocketClient/
-# #WORKDIR /usr/local/src/nodejsWebSocketClient
-# RUN npm install
+##add websocketClient js for test
+WORKDIR /usr/local/src
+COPY nodejsWebSocketClient /usr/local/src/nodejsWebSocketClient/
+WORKDIR /usr/local/src/nodejsWebSocketClient
+COPY /nodejsWebSocketClient/package*.json /usr/local/src/nodejsWebSocketClient/
+#WORKDIR /usr/local/src/nodejsWebSocketClient
+RUN npm install
 
 
 
@@ -190,7 +192,7 @@ WORKDIR /usr/local/src
 
 ######################HOW TO BUILD############################################
 #build
-#sudo docker build -t lwsws-container .
+#sudo docker build -t comlink_v2 .
 
 #run
 # sudo docker run -p 7681:7681 -it comlink_v2 /bin/bash
