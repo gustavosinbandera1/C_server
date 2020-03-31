@@ -79,8 +79,7 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 	/*  const char* redisHost = getenv("REDIS_HOST");
     const char* redisPort = getenv("REDIS_PORT");
 	const char* comlinkHost = getenv("COMLINK_HOST"); 
-
- */
+	*/
 	const char* redisHost = "localhost";
     const char* redisPort = "6379";
 	const char* comlinkHost = "http://localhost:2579/api/device/report-data";
@@ -174,6 +173,7 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 			fprintf(stderr,"\nThe command to send data to comlink is: %s\n", command);
 			fprintf(stderr, (char*)system(command)); 
 			
+			//release allocated memory
 			if(command) free(command);
 			if(ack) free(ack);
 
@@ -193,6 +193,7 @@ static int callback_lws_websocket(struct lws *wsi, enum lws_callback_reasons rea
 		 * let everybody know we want to write something on them
 		 * as soon as they are ready
 		 */
+		//write to socket when possible, vhd struct with payload message will be send to client 
 		lws_callback_on_writable(wsi);
 		break;
 
